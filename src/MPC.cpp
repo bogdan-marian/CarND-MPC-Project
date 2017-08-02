@@ -19,7 +19,7 @@ size_t delta_start = epsi_start + N;
 size_t a_start = delta_start + N - 1;
 
 // reference velocity
-double ref_v = 80;
+double ref_v = 100;
 
 
 class FG_eval {
