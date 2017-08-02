@@ -98,8 +98,36 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
-          double steer_value;
-          double throttle_value;
+          double steer_value = j[1]["steering_angle"];
+          double throttle_value = j[1]["throttle"];
+          double latency = 0.1;
+          double epsi;
+          double cte;
+          Eigen::VectorXd state(6);
+
+          // Predict ahead accounting for latency
+          px = px + v * cos(psi) * latency;
+          py = py + v * sin(psi) * latency;
+          psi = psi - v * steer_value / Lf  * latency;
+          v = v + throttle_value * latency;
+
+          // Convert waypoints from map coordinates to car's local cordinates
+          for (int i = 0; i < ptsx.size(); i++) {
+              ptsx_trans[i] = (ptsx[i] - px) * cos(psi) + (ptsy[i] - py) * sin(psi);
+              ptsy_trans[i] = (ptsy[i] - py) * cos(psi) - (ptsx[i] - px) * sin(psi);
+          }
+
+          // Fit polynomial
+          Eigen::VectorXd coefficients = polyfit(ptsx_trans, ptsy_trans, 3);
+
+          // Calculate cross track error and epsi
+          cte = polyeval(coefficients, 0);
+          epsi = -atan(coefficients[1]);
+          state << 0, 0, 0, v, cte, epsi;
+
+          vector<double> mpc_result = mpc.Solve(state, coefficients);
+          steer_value = -mpc_result[0];
+          throttle_value = mpc_result[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
@@ -107,7 +135,7 @@ int main() {
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
 
-          //Display the MPC predicted trajectory 
+          //Display the MPC predicted trajectory
           vector<double> mpc_x_vals;
           vector<double> mpc_y_vals;
 
