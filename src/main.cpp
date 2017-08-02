@@ -112,6 +112,9 @@ int main() {
           v = v + throttle_value * latency;
 
           // Convert waypoints from map coordinates to car's local cordinates
+          Eigen::VectorXd ptsx_trans = Eigen::VectorXd(ptsx.size());
+          Eigen::VectorXd ptsy_trans = Eigen::VectorXd(ptsy.size());
+          
           for (int i = 0; i < ptsx.size(); i++) {
               ptsx_trans[i] = (ptsx[i] - px) * cos(psi) + (ptsy[i] - py) * sin(psi);
               ptsy_trans[i] = (ptsy[i] - py) * cos(psi) - (ptsx[i] - px) * sin(psi);
@@ -132,6 +135,7 @@ int main() {
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
+          steer_value = steer_value / (deg2rad(25) * Lf);
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
 
@@ -141,6 +145,11 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
+          for(int i = 0; i < 6; i++) {
+            int start_index = 2 + (i * 2);
+            mpc_x_vals.push_back(mpc_result[start_index]);
+            mpc_y_vals.push_back(mpc_result[start_index + 1]);
+          }
 
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
@@ -151,6 +160,10 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+          for (int i = 0; i < ptsx.size(); i++) {
+            next_x_vals.push_back(ptsx_trans[i]);
+            next_y_vals.push_back(ptsy_trans[i]);
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
