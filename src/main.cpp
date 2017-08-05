@@ -43,7 +43,7 @@ double polyeval(Eigen::VectorXd coeffs, double x) {
 
 // Fit a polynomial.
 // Adapted from
-// https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716
+// https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl #L676-L716
 Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
                         int order) {
   assert(xvals.size() == yvals.size());
@@ -114,7 +114,7 @@ int main() {
           // Convert waypoints from map coordinates to car's local cordinates
           Eigen::VectorXd ptsx_trans = Eigen::VectorXd(ptsx.size());
           Eigen::VectorXd ptsy_trans = Eigen::VectorXd(ptsy.size());
-          
+
           for (int i = 0; i < ptsx.size(); i++) {
               ptsx_trans[i] = (ptsx[i] - px) * cos(psi) + (ptsy[i] - py) * sin(psi);
               ptsy_trans[i] = (ptsy[i] - py) * cos(psi) - (ptsx[i] - px) * sin(psi);
